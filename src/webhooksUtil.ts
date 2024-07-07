@@ -185,8 +185,6 @@ export async function fillUSDAmounts(swapEvents: {}[], client: Client, web3: Web
       }
     }
   }
-  console.log(swapEvents);
-  return;
 
   // Writing to DB
   for (const event of swapEvents) {
