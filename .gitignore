@@ -1,0 +1,8 @@
+# OS X
+.DS_Store
+
+# NPM
+node_modules
+.env
+a.json
+.~lock.settings.csv#
