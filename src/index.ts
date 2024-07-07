@@ -19,6 +19,7 @@ import {
   Row,
 } from "./webhooksUtil";
 import { get } from "http";
+import { time } from "console";
 
 dotenv.config();
 
@@ -118,6 +119,26 @@ const main = async () => {
     }
   };
 
+  async function getNearestBlockNumber(param: string, isTo: number) {
+    if (!param.includes("/")) {
+      return parseInt(param);
+    }
+    const [month, day, year] = param.split('/').map(Number);
+    const date = new Date(2000 + year, month - 1, day + isTo);
+    const timestamp = date.getTime() / 1000;
+    const latestBlockNumber = await web3.eth.getBlockNumber();
+    var lo: number = 1, hi: number = Number(latestBlockNumber);
+    while(lo < hi) {
+      const md = (lo + hi) >> 1;
+      const mdTimestamp = parseInt((await web3.eth.getBlock(md)).timestamp);
+      if (mdTimestamp < timestamp)
+        lo = md + 1;
+      else
+        hi = md;
+    }
+    return hi;
+  }
+
   async function readCSV(csvfile: string) {
     const results: Row[] = [];
     fs.createReadStream(csvfile)
@@ -129,17 +150,16 @@ const main = async () => {
         const walletAddresses = data[keys[2]]
           ? data[keys[2]].split(',').map((address: string) => address.trim().toLowerCase())
           : [];
-
         results.push({
-          From: parseInt(from),
-          To: parseInt(to),
+          From: from,
+          To: to,
           Wallet_addresses: walletAddresses,
         });
       })
       .on('end', async () => {
         console.log("Finished reading CSV file.");
         for (const row of results) {
-          await fetchSwapLogs(row.From, row.To, row.Wallet_addresses);
+          await fetchSwapLogs(await getNearestBlockNumber(row.From, 0), await getNearestBlockNumber(row.To, 1), row.Wallet_addresses);
         }
       });
   }

@@ -317,8 +317,8 @@ export interface PairToken {
 }
 
 export interface Row {
-  From: number;
-  To: number;
+  From: string;
+  To: string;
   Wallet_addresses: string[];
 }
 
